@@ -3,6 +3,8 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 import time
+import io
+import PyPDF2
 
 #What each does:
 # 1. requests — lets Python visit websites and download their content (like a browser without the visuals)
@@ -10,6 +12,8 @@ import time
 # 3. urljoin — combines a base URL with a relative link (e.g., /en/page + https://site.com = full URL)
 # 4. urlparse — breaks a URL into parts so we can check if a link belongs to the same website
 # 5. time — lets us pause between requests so we don't overload the server
+# 6. io — Handles files in memory (we don't need to save PDFs to disk)
+# 7. PyPDF2 — Extracts text from PDF files
 
 def get_all_text(base_url, max_pages=50):
     visited = set()
@@ -31,3 +35,32 @@ def get_all_text(base_url, max_pages=50):
             continue
 
 #url = to_visit.pop(0) — Take the first URL from the queue (and remove it from the list)
+        if url.endswith(('.jpg', '.png', '.gif', '.doc', '.docx', '.xls', '.xlsx')):
+            continue
+        
+        # Check if it's a PDF — handle differently
+        is_pdf = url.lower().endswith('.pdf')
+
+        if is_pdf:
+                # Extract text from PDF
+                pdf_file = io.BytesIO(resp.content)
+                reader = PyPDF2.PdfReader(pdf_file)
+                content = ""
+                for page in reader.pages:
+                    page_text = page.extract_text()
+                    if page_text:
+                        content += page_text + "\n"
+                if content:
+                    print(f"  -> Extracted {len(content)} chars from PDF")
+        else:
+                # Extract text from HTML page
+                soup = BeautifulSoup(resp.text, 'html.parser')
+                
+                for tag in soup(['script', 'style', 'nav', 'footer', 'header']):
+                    tag.decompose()
+                
+                main_content = soup.find('main') or soup.find('article') or soup.find('div', class_='content')
+                if main_content:
+                    content = main_content.get_text(separator='\n', strip=True)
+                else:
+                    content = soup.get_text(separator='\n', strip=True)
