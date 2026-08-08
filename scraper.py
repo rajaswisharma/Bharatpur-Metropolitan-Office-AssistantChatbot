@@ -64,3 +64,33 @@ def get_all_text(base_url, max_pages=50):
                     content = main_content.get_text(separator='\n', strip=True)
                 else:
                     content = soup.get_text(separator='\n', strip=True)
+
+"""
+
+A. If it's a PDF:
+
+io.BytesIO(resp.content) — Loads the PDF into memory (no file saved to disk)
+
+PyPDF2.PdfReader(pdf_file) — Opens the PDF for reading
+
+reader.pages — Gets all pages
+
+page.extract_text() — Pulls text from each page
+
+Prints how much text was found
+
+B. If it's a normal web page:
+
+BeautifulSoup(resp.text, 'html.parser') — Parses the HTML
+
+Removes junk elements (scripts, styles, navigation menus)
+
+Tries to find the main content area first
+
+Falls back to extracting all text if no main section found
+"""
+
+# main_content is the result of searching for <main>, <article>, or a class="content" div. If we found one, extract text only from that section. 
+# This gives us clean, focused content
+
+# If we couldn't find a main section, grab text from the entire page. Less clean, but better than getting nothing
