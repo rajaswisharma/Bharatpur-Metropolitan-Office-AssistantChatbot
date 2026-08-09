@@ -81,13 +81,6 @@ def get_all_text(base_url, max_pages=50):
                 for tag in soup(['script', 'style', 'nav', 'footer', 'header']):
                     tag.decompose()
 
-# A. If it's a PDF:
-# io.BytesIO(resp.content) — Loads the PDF into memory (no file saved to disk)
-# PyPDF2.PdfReader(pdf_file) — Opens the PDF for reading
-# reader.pages — Gets all pages
-# page.extract_text() — Pulls text from each page
-# Prints how much text was found
-
 # B. If it's a normal web page:
 # BeautifulSoup(resp.text, 'html.parser') — Parses the HTML
 # Removes junk elements (scripts, styles, navigation menus)
