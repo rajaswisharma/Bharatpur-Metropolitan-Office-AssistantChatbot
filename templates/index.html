@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>भरतपुर महानगरपालिका - सहायक च्याटबट</title>
+    <style>
+                /* ============================================
+           BHARATPUR MUNICIPALITY COLOR PALETTE:
+           - Blue: #1B75BC (Primary)
+           - Light Blue: #E8F4FD (Backgrounds)
+           - Dark Text: #333333
+           - Light Gray: #F5F5F5 (Sections)
+           - White: #FFFFFF
+           ============================================ */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #F5F5F5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ----- Header (Municipality Blue) ----- */
+        header {
+            background-color: #1B75BC;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .header-container h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header-container p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* ----- Main Chat Area ----- */
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 30px 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 750px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* ----- Chat Header ----- */
+        .chat-header {
+            background-color: #1B75BC;
+            color: white;
+            padding: 15px 20px;
+        }
+
+        .chat-header h2 {
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
+
+        .chat-header p {
+            font-size: 12px;
+            opacity: 0.85;
+        }
+
+        /* ----- Chat Message Box ----- */
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #FAFBFC;
+        }
+
+        /* User message bubble */
+        .user-msg {
+            background-color: #E8F4FD;
+            color: #333;
+            padding: 12px 16px;
+            border-radius: 15px 15px 0 15px;
+            margin: 10px 0;
+            max-width: 80%;
+            margin-left: auto;
+            text-align: right;
+            border: 1px solid #D0E8F8;
+        }
+
+        /* Bot message bubble */
+        .bot-msg {
+            background-color: #F5F5F5;
+            color: #333;
+            padding: 12px 16px;
+            border-radius: 15px 15px 15px 0;
+            margin: 10px 0;
+            max-width: 80%;
+            text-align: left;
+            border: 1px solid #E0E0E0;
+        }
+
+        /* Message label */
+        .msg-label {
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 3px;
+            display: block;
+        }
+
+        .user-msg .msg-label {
+            color: #1B75BC;
+        }
+
+        .bot-msg .msg-label {
+            color: #666;
+        }
+
+        /* ----- Input Area ----- */
+        .chat-input-area {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #E0E0E0;
+            background-color: white;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #D0E8F8;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input-area input:focus {
+            border-color: #1B75BC;
+        }
+
+        .chat-input-area button {
+            margin-left: 10px;
+            padding: 12px 25px;
+            background-color: #1B75BC;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            white-space: nowrap;
+        }
+
+        .chat-input-area button:hover {
+            background-color: #1565A0;
+        }
+
+        /* ----- Mode Toggle ----- */
+        .mode-toggle {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: #FAFBFC;
+            border-top: 1px solid #E0E0E0;
+            gap: 8px;
+        }
+
+        .mode-toggle span {
+            font-size: 13px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .mode-toggle button {
+            padding: 8px 16px;
+            border: 2px solid #D0E8F8;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            background-color: white;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .mode-toggle button.active {
+            background-color: #1B75BC;
+            color: white;
+            border-color: #1B75BC;
+        }
+
+        .mode-toggle button:hover {
+            border-color: #1B75BC;
+        }
+
+        /* ----- Footer ----- */
+        footer {
+            background-color: #1B75BC;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* ----- Scrollbar Styling ----- */
+        .chat-box::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-box::-webkit-scrollbar-track {
+            background: #F5F5F5;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb {
+            background: #1B75BC;
+            border-radius: 3px;
+        }
+
+        /* ----- Loading Indicator ----- */
+        .typing-indicator {
+            display: inline-block;
+            padding: 12px 16px;
+            background-color: #F5F5F5;
+            border-radius: 15px 15px 15px 0;
+            margin: 10px 0;
+            border: 1px solid #E0E0E0;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #1B75BC;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-8px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <h1>भरतपुर महानगरपालिका</h1>
+            <p>Bharatpur Metropolitan City - Assistant Chatbot</p>
+        </div>
+    </header>
+
+    <!-- Chat Container -->
+    <main>
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>सहायक च्याटबट</h2>
+                <p>Ask questions about Bharatpur Metropolitan City in Nepali or English</p>
+            </div>
+            
+            <div class="chat-box" id="chat-box">
+                <!-- Messages will appear here -->
+            </div>
+            
+            <div class="chat-input-area">
+                <input type="text" id="user-input" placeholder="तपाइको प्रश्न यहाँ लेख्नुहोस्..." />
+                <button onclick="sendMessage()">पठाउनुहोस्</button>
+            </div>
+            
+            <div class="mode-toggle">
+                <span>Mode:</span>
+                <button id="offline-btn" class="active" onclick="setMode(false)">📚 Offline</button>
+                <button id="ai-btn" onclick="setMode(true)">🤖 AI Enhanced</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 भरतपुर महानगरपालिका च्याटबट | Data sourced from official website</p>
+    </footer>
+
+    <script>
+        // Get references to HTML elements
+        const chatBox = document.getElementById("chat-box");
+        const userInput = document.getElementById("user-input");
+        const offlineBtn = document.getElementById("offline-btn");
+        const aiBtn = document.getElementById("ai-btn");
+
+        let useAI = false;  // Start in offline mode by default
+
+        // ============================================
+        // WELCOME MESSAGE - Shows when page loads
+        // ============================================
+        window.onload = function() {
+            addMessage("नमस्ते! भरतपुर महानगरपालिकाको सहायक च्याटबटमा स्वागत छ। कृपया आफ्नो प्रश्न सोध्नुहोस्।\n\nHello! Welcome to the Bharatpur Metropolitan City Assistant Chatbot. Please ask your question.", "bot");
+        };
+
+        // ============================================
+        // ADD MESSAGE - Creates a chat bubble
+        // ============================================
+        function addMessage(text, sender) {
+            // Create the message container
+            const div = document.createElement("div");
+            
+            // Style based on who sent it
+            if (sender === "user") {
+                div.className = "user-msg";
+            } else {
+                div.className = "bot-msg";
+            }
+            
+            // Add a label showing who sent it
+            const label = document.createElement("span");
+            label.className = "msg-label";
+            if (sender === "user") {
+                label.textContent = "तपाईं (You)";
+            } else {
+                label.textContent = "🤖 सहायक (Assistant)";
+            }
+            
+            // Add the message text
+            const messageText = document.createElement("p");
+            messageText.style.whiteSpace = "pre-wrap";  // Preserves line breaks
+            messageText.textContent = text;
+            
+            // Put it all together
+            div.appendChild(label);
+            div.appendChild(messageText);
+            chatBox.appendChild(div);
+            
+            // Auto-scroll to the bottom
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // ============================================
+        // TYPING INDICATOR - Shows bouncing dots
+        // ============================================
+        function showTyping() {
+            const div = document.createElement("div");
+            div.className = "typing-indicator";
+            div.id = "typing";
+            div.innerHTML = "<span></span><span></span><span></span>";
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function hideTyping() {
+            const typing = document.getElementById("typing");
+            if (typing) {
+                typing.remove();
+            }
+        }
+
+        // ============================================
+        // MODE SWITCHING - Offline vs AI-Enhanced
+        // ============================================
+        function setMode(aiMode) {
+            useAI = aiMode;
+            
+            // Update button styles
+            if (aiMode) {
+                aiBtn.classList.add("active");
+                offlineBtn.classList.remove("active");
+            } else {
+                offlineBtn.classList.add("active");
+                aiBtn.classList.remove("active");
+            }
+        }
+
+        // ============================================
+        // SEND MESSAGE - Main function
+        // ============================================
+        async function sendMessage() {
+            // Get the user's message
+            const message = userInput.value.trim();
+            
+            // Don't send empty messages
+            if (!message) return;
+            
+            // Show user's message in chat
+            addMessage(message, "user");
+            
+            // Clear the input field
+            userInput.value = "";
+            
+            // Show typing indicator while waiting
+            showTyping();
+            
+            try {
+                // Send to Flask backend
+                const response = await fetch("/chat", {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json" 
+                    },
+                    body: JSON.stringify({ 
+                        message: message,
+                        use_ai: useAI 
+                    })
+                });
+                
+                // Parse the JSON response
+                const data = await response.json();
+                
+                // Remove typing indicator
+                hideTyping();
+                
+                // Show the bot's answer
+                if (data.reply) {
+                    addMessage(data.reply, "bot");
+                } else if (data.error) {
+                    addMessage("त्रुटि: " + data.error + "\n\nError: " + data.error, "bot");
+                } else {
+                    addMessage("माफ गर्नुहोस्, केहि समस्या भयो।\n\nSorry, something went wrong.", "bot");
+                }
+            } catch (err) {
+                // Network error handling
+                hideTyping();
+                addMessage("नेटवर्क समस्या। कृपया पुन: प्रयास गर्नुहोस्।\n\nNetwork error. Please try again.", "bot");
+            }
+        }
+
+        // ============================================
+        // KEYBOARD SUPPORT - Press Enter to send
+        // ============================================
+        userInput.addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
