@@ -120,3 +120,22 @@ def get_all_text(base_url, max_pages=50):
             print(f"  -> Failed: {e}")
 
     return all_text
+
+#The Runner Code
+
+if __name__ == "__main__":
+    base_url = "https://bharatpurmun.gov.np/en/node/27"
+    print(f"Starting scrape of {base_url}")
+    print("-" * 50)
+    
+    text = get_all_text(base_url, max_pages=30)
+    
+    with open("website_content.txt", "w", encoding="utf-8") as f:
+    #with open("website_content.txt", "w", encoding="utf-8") as f: — Creates a text file to save everything
+
+        f.write(text)
+        #f.write(text) — Writes all scraped text to the file
+    
+    print(f"\n{'='*50}")
+    print(f"Done! Scraped {len(text)} characters from the website.")
+    print(f"Content saved to website_content.txt")
