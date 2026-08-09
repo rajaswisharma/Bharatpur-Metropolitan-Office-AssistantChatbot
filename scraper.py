@@ -4,6 +4,8 @@ from urllib.parse import urljoin, urlparse
 import time
 import io
 import PyPDF2
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # What each does:
 # 1. requests — lets Python visit websites and download their content (like a browser without the visuals)
@@ -41,11 +43,11 @@ def get_all_text(base_url, max_pages=50):
 
         try:
             print(f"Scraping: {url}")
-            resp = requests.get(url, timeout=15, headers={
-                'User-Agent': 'Mozilla/5.0 (compatible; ChatbotScraper/1.0)'
-            })
-            # requests.get(url, timeout=15, headers=...) — Downloads the page
-            # timeout=15 — Wait max 15 seconds
+            resp = requests.get(url, timeout=30, headers={
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            }, verify=False)
+            # requests.get(url, timeout=30, headers=...) — Downloads the page
+            # timeout=30 — Wait max 30 seconds
             # User-Agent — Pretends to be a real browser so websites don't block us
             
             if resp.status_code != 200:
@@ -121,21 +123,73 @@ def get_all_text(base_url, max_pages=50):
 
     return all_text
 
-#The Runner Code
+
+# ============================================================
+# THE RUNNER CODE — Modified for slow websites
+# ============================================================
+# Instead of crawling 30 pages automatically (which times out on slow servers),
+# we manually list important URLs and scrape them one by one with longer waits.
 
 if __name__ == "__main__":
-    base_url = "https://bharatpurmun.gov.np/en/node/27"
-    print(f"Starting scrape of {base_url}")
-    print("-" * 50)
+    # List of important pages to scrape — add more URLs as needed
+    important_urls = [
+        "https://bharatpurmun.gov.np/en/node/27",
+        "https://bharatpurmun.gov.np/en",
+        "https://bharatpurmun.gov.np/en/introduction",
+        "https://bharatpurmun.gov.np/en/organization-structure",
+        "https://bharatpurmun.gov.np/en/services",
+        # Add any other specific pages you want the chatbot to know about
+    ]
     
-    text = get_all_text(base_url, max_pages=30)
+    all_text = ""
+    total_scraped = 0
     
+    for i, url in enumerate(important_urls, 1):
+        print(f"\n[{i}/{len(important_urls)}] Scraping: {url}")
+        print("-" * 40)
+        
+        try:
+            # Download the page with a longer timeout
+            resp = requests.get(url, timeout=60, headers={
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            }, verify=False)
+            
+            if resp.status_code == 200:
+                soup = BeautifulSoup(resp.text, 'html.parser')
+                
+                # Remove junk elements
+                for tag in soup(['script', 'style', 'nav', 'footer', 'header']):
+                    tag.decompose()
+                
+                # Try to find main content
+                main_content = soup.find('main') or soup.find('article') or soup.find('div', class_='content')
+                if main_content:
+                    content = main_content.get_text(separator='\n', strip=True)
+                else:
+                    content = soup.get_text(separator='\n', strip=True)
+                
+                if content:
+                    all_text += f"\n--- Page: {url} ---\n"
+                    all_text += content + "\n"
+                    total_scraped += len(content)
+                    print(f"  -> Success! ({len(content)} characters)")
+                else:
+                    print(f"  -> No content found on this page")
+            else:
+                print(f"  -> Skipped (status {resp.status_code})")
+                
+        except Exception as e:
+            print(f"  -> Failed: {e}")
+        
+        # Longer delay between requests for slow servers
+        time.sleep(3)
+    
+    # Save everything to a file
     with open("website_content.txt", "w", encoding="utf-8") as f:
-    #with open("website_content.txt", "w", encoding="utf-8") as f: — Creates a text file to save everything
-
+        # Creates a text file to save everything
         f.write(text)
-        #f.write(text) — Writes all scraped text to the file
+        # f.write(text) — Writes all scraped text to the file
     
     print(f"\n{'='*50}")
-    print(f"Done! Scraped {len(text)} characters from the website.")
+    print(f"Done! Scraped {total_scraped} characters from {len(important_urls)} pages.")
     print(f"Content saved to website_content.txt")
