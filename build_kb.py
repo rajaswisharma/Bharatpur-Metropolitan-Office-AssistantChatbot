@@ -26,12 +26,40 @@ def build_knowledge_base(text_file="website_content.txt", collection_name="bhara
     chunks = []
     chunk_size = 500
     overlap = 50
+    #overlap = 50 — Each chunk shares 50 characters with the next one (prevents cutting words/sentences in half)
     start = 0
     
     while start < len(raw_text):
         end = min(start + chunk_size, len(raw_text))
         chunk = raw_text[start:end]
+        #chunk = raw_text[start:end] — Grab a 500-character slice
         chunks.append(chunk)
         start += chunk_size - overlap
     
     print(f"Split into {len(chunks)} chunks")
+
+# Chunk 1: [characters 1-500]
+# Chunk 2:        [characters 451-950]
+# Chunk 3:               [characters 901-1400]
+
+    # Convert each chunk into embeddings (numerical representations)
+    # The model understands meaning in both Nepali and English
+    print("Creating embeddings...")
+    embeddings = model.encode(chunks).tolist() #.tolist() — Converts to a format ChromaDB understands
+
+    # Store in ChromaDB (a local vector database)
+    client = chromadb.PersistentClient(path="./chroma_db")
+    #chromadb.PersistentClient(path="./chroma_db") — Creates/opens a database folder on your computer
+    collection = client.get_or_create_collection(name=collection_name)
+    
+    # Add all chunks with their embeddings to the database
+    collection.add(
+        embeddings=embeddings,
+        documents=chunks,
+        ids=[f"chunk_{i}" for i in range(len(chunks))]
+    )
+    
+    print(f"Stored {len(chunks)} chunks in the knowledge base!")
+
+if __name__ == "__main__":
+    build_knowledge_base()
