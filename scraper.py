@@ -41,8 +41,25 @@ def get_all_text(base_url, max_pages=50):
         # Check if it's a PDF — handle differently
         is_pdf = url.lower().endswith('.pdf')
 
-        if is_pdf:
-                # Extract text from PDF
+        try:
+            print(f"Scraping: {url}")
+            resp = requests.get(url, timeout=15, headers={
+                'User-Agent': 'Mozilla/5.0 (compatible; ChatbotScraper/1.0)'
+            })
+            if resp.status_code != 200:
+                print(f"  -> Skipped (status {resp.status_code})")
+                continue
+# requests.get(url, timeout=15, headers=...) — Downloads the page
+
+# timeout=15 — Wait max 15 seconds
+
+# User-Agent — Pretends to be a real browser so websites don't block us
+
+# resp.status_code — 200 = success, 404 = not found, etc.
+
+# If it's not 200, skip this page
+
+            if is_pdf:
                 pdf_file = io.BytesIO(resp.content)
                 reader = PyPDF2.PdfReader(pdf_file)
                 content = ""
@@ -52,12 +69,30 @@ def get_all_text(base_url, max_pages=50):
                         content += page_text + "\n"
                 if content:
                     print(f"  -> Extracted {len(content)} chars from PDF")
-        else:
-                # Extract text from HTML page
+# A. If it's a PDF:
+# io.BytesIO(resp.content) — Loads the PDF into memory (no file saved to disk)
+# PyPDF2.PdfReader(pdf_file) — Opens the PDF for reading
+# reader.pages — Gets all pages
+# page.extract_text() — Pulls text from each page
+# Prints how much text was found
+            else:
                 soup = BeautifulSoup(resp.text, 'html.parser')
                 
                 for tag in soup(['script', 'style', 'nav', 'footer', 'header']):
                     tag.decompose()
+
+# A. If it's a PDF:
+# io.BytesIO(resp.content) — Loads the PDF into memory (no file saved to disk)
+# PyPDF2.PdfReader(pdf_file) — Opens the PDF for reading
+# reader.pages — Gets all pages
+# page.extract_text() — Pulls text from each page
+# Prints how much text was found
+
+# B. If it's a normal web page:
+# BeautifulSoup(resp.text, 'html.parser') — Parses the HTML
+# Removes junk elements (scripts, styles, navigation menus)
+# Tries to find the main content area first
+# Falls back to extracting all text if no main section found
                 
                 main_content = soup.find('main') or soup.find('article') or soup.find('div', class_='content')
                 if main_content:
@@ -65,32 +100,6 @@ def get_all_text(base_url, max_pages=50):
                 else:
                     content = soup.get_text(separator='\n', strip=True)
 
-"""
-
-A. If it's a PDF:
-
-io.BytesIO(resp.content) — Loads the PDF into memory (no file saved to disk)
-
-PyPDF2.PdfReader(pdf_file) — Opens the PDF for reading
-
-reader.pages — Gets all pages
-
-page.extract_text() — Pulls text from each page
-
-Prints how much text was found
-
-B. If it's a normal web page:
-
-BeautifulSoup(resp.text, 'html.parser') — Parses the HTML
-
-Removes junk elements (scripts, styles, navigation menus)
-
-Tries to find the main content area first
-
-Falls back to extracting all text if no main section found
-"""
-
 # main_content is the result of searching for <main>, <article>, or a class="content" div. If we found one, extract text only from that section. 
 # This gives us clean, focused content
-
 # If we couldn't find a main section, grab text from the entire page. Less clean, but better than getting nothing
