@@ -263,6 +263,17 @@
             0%, 80%, 100% { transform: translateY(0); }
             40% { transform: translateY(-8px); }
         }
+                /* ----- Source Links Styling ----- */
+        .bot-msg a {
+            color: #1B75BC;
+            text-decoration: none;
+            border-bottom: 1px dotted #1B75BC;
+        }
+
+        .bot-msg a:hover {
+            color: #1565A0;
+            border-bottom: 1px solid #1565A0;
+        }
     </style>
 </head>
 <body>
@@ -305,7 +316,7 @@
     </footer>
 
     <script>
-        // Get references to HTML elements
+                // Get references to HTML elements
         const chatBox = document.getElementById("chat-box");
         const userInput = document.getElementById("user-input");
         const offlineBtn = document.getElementById("offline-btn");
@@ -317,11 +328,12 @@
         // WELCOME MESSAGE - Shows when page loads
         // ============================================
         window.onload = function() {
-            addMessage("नमस्ते! भरतपुर महानगरपालिकाको सहायक च्याटबटमा स्वागत छ। कृपया आफ्नो प्रश्न सोध्नुहोस्।\n\nHello! Welcome to the Bharatpur Metropolitan City Assistant Chatbot. Please ask your question.", "bot");
+            const welcomeMsg = "नमस्ते! भरतपुर महानगरपालिकाको सहायक च्याटबटमा स्वागत छ। कृपया आफ्नो प्रश्न सोध्नुहोस्।\n\nHello! Welcome to the Bharatpur Metropolitan City Assistant Chatbot. Please ask your question.";
+            addMessage(welcomeMsg, "bot");
         };
 
         // ============================================
-        // ADD MESSAGE - Creates a chat bubble
+        // ADD MESSAGE - Creates a chat bubble with clickable links
         // ============================================
         function addMessage(text, sender) {
             // Create the message container
@@ -343,10 +355,20 @@
                 label.textContent = "🤖 सहायक (Assistant)";
             }
             
-            // Add the message text
-            const messageText = document.createElement("p");
+            // Add the message text with clickable links
+            const messageText = document.createElement("div");
             messageText.style.whiteSpace = "pre-wrap";  // Preserves line breaks
-            messageText.textContent = text;
+            
+            // Convert URLs to clickable links
+            // This finds http/https URLs in the text and wraps them in <a> tags
+            messageText.innerHTML = text
+                .replace(/\n/g, '<br>')  // Convert newlines to <br> tags
+                .replace(
+                    /(https?:\/\/[^\s<]+)/g, 
+                    '<a href="$1" target="_blank" rel="noopener">$1</a>'
+                );
+            // target="_blank" — Opens link in new tab
+            // rel="noopener" — Security best practice for target="_blank"
             
             // Put it all together
             div.appendChild(label);
@@ -358,7 +380,7 @@
         }
 
         // ============================================
-        // TYPING INDICATOR - Shows bouncing dots
+        // TYPING INDICATOR - Shows bouncing dots while waiting
         // ============================================
         function showTyping() {
             const div = document.createElement("div");
@@ -432,12 +454,32 @@
                 
                 // Show the bot's answer
                 if (data.reply) {
-                    addMessage(data.reply, "bot");
+                    // Build the full message with sources
+                    let fullMessage = data.reply;
+                    
+                    // Add sources section if sources are available
+                    if (data.sources && data.sources.length > 0) {
+                        fullMessage += "\n\n───────────────\n";
+                        fullMessage += "📎 स्रोतहरू (Sources):\n";
+                        
+                        // Add each source as a numbered link
+                        data.sources.forEach((source, index) => {
+                            fullMessage += `\n${index + 1}. ${source.url}`;
+                        });
+                    }
+                    
+                    // Display the message with clickable source links
+                    addMessage(fullMessage, "bot");
+                    
                 } else if (data.error) {
+                    // Show error message
                     addMessage("त्रुटि: " + data.error + "\n\nError: " + data.error, "bot");
+                    
                 } else {
+                    // Fallback for unexpected response
                     addMessage("माफ गर्नुहोस्, केहि समस्या भयो।\n\nSorry, something went wrong.", "bot");
                 }
+                
             } catch (err) {
                 // Network error handling
                 hideTyping();

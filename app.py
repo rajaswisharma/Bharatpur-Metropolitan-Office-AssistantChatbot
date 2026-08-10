@@ -32,10 +32,10 @@ def index():
 def chat():
     """
     Receives a message from the user, processes it through
-    the chatbot, and returns the answer as JSON.
+    the chatbot, and returns the answer with sources as JSON.
     
     Frontend sends: { "message": "user's question", "use_ai": true/false }
-    Backend returns: { "reply": "bot's answer" }
+    Backend returns: { "reply": "formatted answer", "sources": [...] }
     """
     
     # Step 1: Get the JSON data from the frontend
@@ -55,15 +55,26 @@ def chat():
     
     # Step 4: Get the answer from the chatbot
     try:
-        answer = ask_question(user_message, use_ai=use_ai)
+        # ask_question() returns a dict: { "answer": "...", "sources": [...] }
+        result = ask_question(user_message, use_ai=use_ai)
         # Calls your chatbot function from chatbot.py
-        # use_ai=True → AI-enhanced answer
+        # use_ai=True → AI-enhanced formatted answer
         # use_ai=False → Raw knowledge base results
         
-        # Step 5: Send the answer back to the frontend
-        return jsonify({"reply": answer})
+        # Step 5: Send the answer and sources back to the frontend
+        return jsonify({
+            "reply": result["answer"],
+            "sources": result.get("sources", [])
+        })
         # jsonify converts Python dict to JSON
-        # Frontend receives: { "reply": "the answer text" }
+        # Frontend receives: 
+        # {
+        #     "reply": "The formatted answer text",
+        #     "sources": [
+        #         {"title": "...", "url": "https://...", "document": "..."},
+        #         ...
+        #     ]
+        # }
         
     except Exception as e:
         # If anything goes wrong, tell the frontend
@@ -82,6 +93,11 @@ if __name__ == "__main__":
     if not os.path.exists("templates"):
         print("⚠️  Warning: 'templates' folder not found!")
         print("   Create a 'templates' folder and add index.html")
+    
+    # Check if the chroma_db folder exists
+    if not os.path.exists("chroma_db"):
+        print("⚠️  Warning: 'chroma_db' folder not found!")
+        print("   Run 'python build_kb.py' first to create the knowledge base")
     
     # Start the server
     print("\n" + "="*50)
