@@ -103,10 +103,10 @@ if __name__ == "__main__":
     print("\n" + "="*50)
     print("🇳🇵  Bharatpur Municipality Chatbot Server")
     print("="*50)
-    print("Open your browser and go to: http://127.0.0.1:5000")
+    print("Open your browser and go to: http://127.0.0.1:5050")
     print("Press Ctrl+C to stop the server")
     print("="*50 + "\n")
     
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5050)
     # debug=True — Auto-reloads when you change code
-    # port=5000 — The server runs on http://127.0.0.1:5000
+    # port=5050 — The server runs on http://127.0.0.1:5050
